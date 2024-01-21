@@ -8,6 +8,7 @@ env:
 
 jobs:
   Build-Open-Faas-Fn:
+    permissions: write-all
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
