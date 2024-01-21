@@ -12,3 +12,4 @@ jobs:
       - name: openfaas-setup-cli
         uses: goncalo-oliveira/openfaas-setup-cli@v1
       - run: faas-cli version
+      - run: faas-cli build -f echo.yml
