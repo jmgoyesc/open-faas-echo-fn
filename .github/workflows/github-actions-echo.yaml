@@ -9,6 +9,9 @@ jobs:
   Build-Open-Faas-Fn:
     runs-on: ubuntu-latest
     steps:
+      - name: Git Checkout Code
+        uses: actions/checkout@v1
+        id: git_checkout
       - name: openfaas-setup-cli
         uses: goncalo-oliveira/openfaas-setup-cli@v1
       - run: faas-cli version
