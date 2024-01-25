@@ -36,6 +36,8 @@ jobs:
           use_api: true
           scheme: semver
           increment: patch
+      - run: git tag ${{ steps.version.outputs.version }}
+      - run: git push origin ${{ steps.version.outputs.version }}
 
       # Build and push
       - run: FN_VERSION="${{ steps.version.outputs.version }}" faas-cli build -f echo.yml
