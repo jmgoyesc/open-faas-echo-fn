@@ -46,8 +46,7 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: '20.x'
-      - run: cd holder-client
-      - run: npm install
+      - run: npm ci
       - run: node holder-client.js
 
 
