@@ -33,6 +33,7 @@ jobs:
         uses: reecetech/version-increment@2023.9.3
         id: version
         with:
+          use_api: true
           scheme: semver
           increment: patch
 
@@ -46,7 +47,7 @@ jobs:
         with:
           node-version: '20.x'
       - run: cd holder-client
-      - run: npm ci
-      - run: npm run build
+      - run: npm install
+      - run: node holder-client.js
 
 
