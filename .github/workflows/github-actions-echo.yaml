@@ -1,6 +1,6 @@
 name: OpenFaasFn
 run-name: Build OpenFaas Fn
-on: [push]     
+on: [push]
 
 env:
   REGISTRY: ghcr.io
@@ -39,3 +39,14 @@ jobs:
       # Build and push
       - run: FN_VERSION="${{ steps.version.outputs.version }}" faas-cli build -f echo.yml
       - run: "docker push ghcr.io/jmgoyesc/open-faas-echo-fn:${{ steps.version.outputs.version }}"
+
+      # Create Verifiable Credential
+      - name: Create Verifiable Credential with Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '20.x'
+        - run: cd holder-client
+        - run: npm ci
+        - run: npm run build
+
+
