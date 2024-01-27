@@ -21,7 +21,7 @@ const getDigest = async () => {
 
 let config = {
     maxBodyLength: Infinity,
-    baseURL: `${host}:8001`,
+    baseURL: `${host}:7001`,
     headers: {},
 };
 
