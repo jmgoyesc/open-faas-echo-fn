@@ -7,6 +7,7 @@ const namespace_repository = process.argv[4];
 const namespace = namespace_repository.split("/")[0];
 const repository = namespace_repository.split("/")[1];
 const tag = process.argv[5];
+
 const getDigest = async () => {
     const tokenResponse = await axios.get(
         "https://ghcr.io/token?scope=repository:jmgoyesc/open-faas-echo-fn:pull"
@@ -21,7 +22,7 @@ const getDigest = async () => {
 
 let config = {
     maxBodyLength: Infinity,
-    baseURL: `${host}:7001`,
+    baseURL: `http://${host}:7001`,
     headers: {},
 };
 
