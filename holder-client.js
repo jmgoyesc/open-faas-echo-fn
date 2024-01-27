@@ -1,14 +1,32 @@
 const axios = require("axios");
 
+const cred_def_id = process.argv[2];
+
+const host = process.argv[3];
+const namespace_repository = process.argv[4];
+const namespace = namespace_repository.split("/")[0];
+const repository = namespace_repository.split("/")[1];
+const tag = process.argv[5];
+const getDigest = async () => {
+    const tokenResponse = await axios.get(
+        "https://ghcr.io/token?scope=repository:jmgoyesc/open-faas-echo-fn:pull"
+    );
+    const token = tokenResponse.data.token;
+    const response = await axios.get(
+        "https://ghcr.io/v2/jmgoyesc/open-faas-echo-fn/manifests/latest",
+        { headers: { Authorization: `Bearer ${token}` } }
+    );
+    return response.data.config.digest;
+};
+
 let config = {
     maxBodyLength: Infinity,
-    baseURL: "http://52.59.189.134:7001",
+    baseURL: `${host}:8001`,
     headers: {},
 };
 
-const cred_def_id = "6i7GFi2cDx524ZNfxmGWcp:3:CL:12:default";
 const issuer_did = "6i7GFi2cDx524ZNfxmGWcp";
-const issuer_schema_id = "6i7GFi2cDx524ZNfxmGWcp:2:docker-vc:1.0";
+const issuer_schema_id = "6i7GFi2cDx524ZNfxmGWcp:2:docker-vc:2.0";
 
 const getConnectionId = async () => {
     const response = await axios.get("/connections", config);
@@ -52,7 +70,7 @@ const sendProposal = async (proposal) => {
         schema_id: proposal.issuer_schema_id,
         schema_issuer_did: proposal.issuer_did,
         schema_name: "docker-vc",
-        schema_version: "1.0",
+        schema_version: "2.0",
         trace: true,
     };
     const response = await axios.post(
@@ -127,9 +145,9 @@ const waitForCredentialReceived = async (
     );
 };
 
-const storeCredential = async (credential_exchange_id) => {
+const storeCredential = async (credential_exchange_id, namespace, repository, tag) => {
     const data = {
-        credential_id: "jmgoyesc/open-faas-fn-echo_{{tag}}",
+        credential_id: `${namespace}/${repository}_${tag}`
     };
     await axios.post(
         `/issue-credential/records/${credential_exchange_id}/store`,
@@ -140,16 +158,16 @@ const storeCredential = async (credential_exchange_id) => {
 
 const main = async () => {
     const connection_id = await getConnectionId();
+    const digest = await getDigest();
     const proposal = {
         connection_id,
         cred_def_id: cred_def_id,
         issuer_did: issuer_did,
         issuer_schema_id: issuer_schema_id,
-        namespace: "jmgoyesc",
-        repository: "open-faas-fn-echo",
-        tag: "0.0.2",
-        digest:
-            "sha256:4c5b5e9f8a8c3c1e2d3e4a5b6f7c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6",
+        namespace: namespace,
+        repository: repository,
+        tag: tag,
+        digest: digest,
     };
     let { credential_exchange_id } = await sendProposal(proposal);
     console.log("initial credential exchange id: " + credential_exchange_id);
@@ -172,7 +190,7 @@ const main = async () => {
         credential_exchange_id
     );
 
-    await storeCredential(credential_exchange_id);
+    await storeCredential(credential_exchange_id, namespace, repository, tag);
 };
 
 main()
