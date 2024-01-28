@@ -17,7 +17,7 @@ const getDigest = async () => {
         `https://ghcr.io/v2/${namespace}/${repository}/manifests/${tag}`,
         { headers: { Authorization: `Bearer ${token}` } }
     );
-    return response.data.config.digest;
+    return response.headers["docker-content-digest"];
 };
 
 let config = {
