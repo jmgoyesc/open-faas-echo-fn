@@ -10,11 +10,11 @@ const tag = process.argv[5];
 
 const getDigest = async () => {
     const tokenResponse = await axios.get(
-        "https://ghcr.io/token?scope=repository:jmgoyesc/open-faas-echo-fn:pull"
+        `https://ghcr.io/token?scope=repository:${namespace}/${repository}:pull`
     );
     const token = tokenResponse.data.token;
     const response = await axios.get(
-        "https://ghcr.io/v2/jmgoyesc/open-faas-echo-fn/manifests/latest",
+        `https://ghcr.io/v2/${namespace}/${repository}/manifests/${tag}`,
         { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.data.config.digest;
@@ -146,7 +146,7 @@ const waitForCredentialReceived = async (
     );
 };
 
-const storeCredential = async (credential_exchange_id, namespace, repository, tag) => {
+const storeCredential = async (credential_exchange_id, tag) => {
     const data = {
         credential_id: `${namespace}/${repository}_${tag}`
     };
@@ -191,7 +191,7 @@ const main = async () => {
         credential_exchange_id
     );
 
-    await storeCredential(credential_exchange_id, namespace, repository, tag);
+    await storeCredential(credential_exchange_id, tag);
 };
 
 main()
