@@ -27,12 +27,18 @@ let config = {
 };
 
 const issuer_did = "6i7GFi2cDx524ZNfxmGWcp";
-const issuer_schema_id = "6i7GFi2cDx524ZNfxmGWcp:2:docker-vc:2.0";
 
 const getConnectionId = async () => {
     const response = await axios.get("/connections", config);
     return response.data.results.find((it) => it.their_label === "Issuer")
         .connection_id;
+};
+
+const getLatestSchemaId = async () => {
+    const response = await axios.get("/schemas/created", config);
+    const schemas = response.data.schema_ids;
+    schemas.sort((a,b) => parseFloat(a.split(":")[3]) - parseFloat(b.split(":")[3]));
+    return schemas.pop();
 };
 
 const sendProposal = async (proposal) => {
@@ -71,7 +77,7 @@ const sendProposal = async (proposal) => {
         schema_id: proposal.issuer_schema_id,
         schema_issuer_did: proposal.issuer_did,
         schema_name: "docker-vc",
-        schema_version: "2.0",
+        schema_version: proposal.issuer_schema_id.split(":")[3],
         trace: true,
     };
     const response = await axios.post(
@@ -159,12 +165,13 @@ const storeCredential = async (credential_exchange_id, tag) => {
 
 const main = async () => {
     const connection_id = await getConnectionId();
+    const schemaId = await getLatestSchemaId();
     const digest = await getDigest();
     const proposal = {
         connection_id,
         cred_def_id: cred_def_id,
         issuer_did: issuer_did,
-        issuer_schema_id: issuer_schema_id,
+        issuer_schema_id: schemaId,
         namespace: namespace,
         repository: repository,
         tag: tag,
