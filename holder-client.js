@@ -1,20 +1,23 @@
 const axios = require("axios");
 
-const cred_def_id = process.argv[2];
+// how to invoke: node holder-client.js [holder_host] [issuer_host] [cred_def_id] [repository] [tag]
 
-const host = process.argv[3];
-const namespace_repository = process.argv[4];
-const namespace = namespace_repository.split("/")[0];
-const repository = namespace_repository.split("/")[1];
-const tag = process.argv[5];
+const holder_host = process.argv[2];
+const issuer_host = process.argv[3];
+const cred_def_id = process.argv[4];
+const repository = process.argv[5];
+const tag = process.argv[6];
+
+const namespace = repository.split("/")[0];
+const project = repository.split("/")[1];
 
 const getDigest = async () => {
     const tokenResponse = await axios.get(
-        `https://ghcr.io/token?scope=repository:${namespace}/${repository}:pull`
+        `https://ghcr.io/token?scope=repository:${repository}:pull`
     );
     const token = tokenResponse.data.token;
     const response = await axios.get(
-        `https://ghcr.io/v2/${namespace}/${repository}/manifests/${tag}`,
+        `https://ghcr.io/v2/${repository}/manifests/${tag}`,
         { headers: { Authorization: `Bearer ${token}` } }
     );
     return response.headers["docker-content-digest"];
@@ -22,7 +25,7 @@ const getDigest = async () => {
 
 let config = {
     maxBodyLength: Infinity,
-    baseURL: `http://${host}:7001`,
+    baseURL: `http://${holder_host}:7001`,
     headers: {},
 };
 
@@ -35,7 +38,7 @@ const getConnectionId = async () => {
 };
 
 const getLatestSchemaId = async () => {
-    const response = await axios.get("/schemas/created", config);
+    const response = await axios.get(`http://${issuer_host}:7001/schemas/created`);
     const schemas = response.data.schema_ids;
     schemas.sort((a,b) => parseFloat(a.split(":")[3]) - parseFloat(b.split(":")[3]));
     return schemas.pop();
@@ -154,7 +157,7 @@ const waitForCredentialReceived = async (
 
 const storeCredential = async (credential_exchange_id, tag) => {
     const data = {
-        credential_id: `${namespace}/${repository}_${tag}`
+        credential_id: `${namespace}/${project}_${tag}`
     };
     await axios.post(
         `/issue-credential/records/${credential_exchange_id}/store`,
@@ -173,7 +176,7 @@ const main = async () => {
         issuer_did: issuer_did,
         issuer_schema_id: schemaId,
         namespace: namespace,
-        repository: repository,
+        repository: project,
         tag: tag,
         digest: digest,
     };

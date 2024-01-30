@@ -7,6 +7,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}
   CRED_DEF_ID: ${{ vars.CRED_DEF_ID }}
   HOLDER_HOST: ${{ vars.HOLDER_HOST }}
+  ISSUER_HOST: ${{ vars.ISSUER_HOST }}
 
 jobs:
   Build-Open-Faas-Fn:
@@ -51,6 +52,6 @@ jobs:
         with:
           node-version: '20.x'
       - run: npm ci
-      - run: node holder-client.js ${{ env.CRED_DEF_ID }} ${{ env.HOLDER_HOST }} ${{ env.IMAGE_NAME }} ${{ steps.version.outputs.version }}
+      - run: node holder-client.js ${{ env.HOLDER_HOST }} ${{ env.ISSUER_HOST }} ${{ env.CRED_DEF_ID }} ${{ env.IMAGE_NAME }} ${{ steps.version.outputs.version }}
 
 
