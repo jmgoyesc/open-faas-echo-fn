@@ -8,5 +8,5 @@ import (
 //
 //goland:noinspection GoUnusedExportedFunction
 func Handle(req []byte) string {
-	return fmt.Sprintf("Hello, GitHub Actions v17. You said: %s", string(req))
+	return fmt.Sprintf("Hello, GitHub Actions v18. You said: %s", string(req))
 }
